@@ -1,15 +1,11 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Image from './Components/Images/image';
-import Modal from './Components/Modal/modal';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.css';
-import Select from 'react-select';
-import Annotation from 'react-image-annotation';
+import ImageSelect from './Components/Images/ImageSelect';
+import Annotation from 'react-image-annotation'
 import RectangleSelector from 'react-image-annotation/lib/selectors';
-import img from './assets/images/5/5/50000.jpg';
-import imgTwo from './assets/images/5/5/50001.jpg';
 
 class App extends Component {
   state = {
@@ -19,7 +15,6 @@ class App extends Component {
       label: '50000.jpg'
     },
     selectedImage: '',
-    radioValue: '',
     savedImages: [],
     annotations: [],
     annotation: {},
@@ -37,40 +32,11 @@ class App extends Component {
       .catch(err => console.log(err));
   }
 
-  handleModal = (e) => {
-    console.log(e.target)
-    let imageObject = {
-      image: {
-        radioValue: this.state.radioValue,
-        imageUrl: e.target.value
-      }
-
-    };
-
-
-    // post to axios
-    axios.post(`/api/medicalImaging/images`, imageObject)
-      .then(res => {
-        console.log(res);
-        let savedImages = this.state.savedImages.push(res);
-        console.log(savedImages)
-        this.setState({ savedImages: savedImages })
-      })
-      .catch(err => console.log(err))
-
-  }
-
   handleSelectChange = (selectedOption) => {
     console.log(selectedOption)
     console.log(this.state.selectedOption)
     this.setState({ selectedOption });
     console.log(this.state.selectedOption)
-  }
-
-  handleChange = (e) => {
-    let radioValue = this.state.radioValue;
-    // console.log(radioValue)
-    this.setState({ radioValue: e.target.value })
   }
 
   annotationOnChange = (annotation) => {
@@ -80,21 +46,46 @@ class App extends Component {
   annotationOnSubmit = (annotation) => {
     const { geometry, data } = annotation;
     let testAnnotations = this.state.testAnnotations;
-    testAnnotations.push(annotation);
+    let annotations = this.state.annotations.concat({
+      geometry,
+      data: {
+        ...data,
+        id: Math.random()
+      }
+    });
+
+    testAnnotations.push(annotations);
+
+    console.log(annotations);
 
     this.setState({
       annotation: {},
-      annotations: this.state.annotations.concat({
-        geometry,
-        data: {
-          ...data,
-          id: Math.random()
-        }
-      }),
+      annotations: annotations,
       testAnnotations: testAnnotations
     })
 
-    console.log(this.state)
+    let imageObject = {
+      image: {
+        url: this.state.currentImage
+      }
+    }
+
+    let annotationObject = {
+      annotation: annotations,
+      imageId: ''
+    }
+
+
+    axios.post(`/api/medicalImaging/images`, imageObject)
+      .then(res => {
+        console.log(res.data);
+        annotationObject.imageId = res.data._id
+        console.log(annotationObject)
+        axios.post(`/api/medicalImaging/images/annotations/${res.data._id}`, annotationObject)
+          .then(res => console.log(res))
+          .catch(err => console.log(err))
+      })
+      .catch(err => console.log(err))
   }
 
 
@@ -104,8 +95,8 @@ class App extends Component {
     return (
       <div className="App">
 
-        <Select
-          value={this.state.selectedOption}
+        <ImageSelect
+          value={this.state.selectedOption.label}
           onChange={this.handleSelectChange}
           options={this.state.images}
           isSearchable={true}
@@ -124,22 +115,7 @@ class App extends Component {
               onSubmit={this.annotationOnSubmit}
             />
           </div>
-
         </div>
-
-
-        {this.state.images.map((image, i) => {
-          return (
-            <React.Fragment key={`fragment${i}`}>
-              {/* <Image key={i} src={require(`${image}`)} />
-              <Modal key={'modal' + i} modalTarget={`modal${i}`} onClick={this.handleModal} onChange={this.handleChange} imageValue={image} /> */}
-
-
-            </React.Fragment>
-          )
-
-
-        })}
 
       </div>
     );
