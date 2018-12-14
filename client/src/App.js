@@ -35,13 +35,22 @@ class App extends Component {
   handleSelectChange = (selectedOption) => {
     console.log(selectedOption)
     // console.log(this.state.selectedOption)
+
     this.setState({
       selectedOption: selectedOption,
       annotations: []
     });
 
     axios.get(`/api/medicalImaging/images/${selectedOption.label}`)
-      .then(res => console.log(res))
+      .then(res => {
+        let latestAnnotation = res.data.slice(0, 1)[0].annotations[0].annotation;
+        console.log(latestAnnotation);
+
+        this.setState({
+          annotations: latestAnnotation,
+        })
+
+      })
       .catch(err => console.log(err))
     console.log(this.state.selectedOption)
   }
@@ -51,6 +60,7 @@ class App extends Component {
   }
 
   annotationOnSubmit = (annotation) => {
+    console.log(annotation)
     const { geometry, data } = annotation;
     let testAnnotations = this.state.testAnnotations;
     let annotations = this.state.annotations.concat({
@@ -61,6 +71,8 @@ class App extends Component {
       }
     });
 
+    console.log(annotations)
+
     testAnnotations.push(annotations);
 
     console.log(annotations);
@@ -70,6 +82,8 @@ class App extends Component {
       annotations: annotations,
       testAnnotations: testAnnotations
     })
+
+    console.log(this.state.annotations);
 
     let imageObject = {
       imageUrl: this.state.selectedOption.value,
