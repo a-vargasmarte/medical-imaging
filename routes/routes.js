@@ -9,7 +9,10 @@ router.route('/medicalImaging/images')
     .get(imageController.getImages) //get all images
     .post(imageController.createImage) //create an image
 
-router.route('/medicalImaging/images/annotations/:id')
+router.route('/medicalImaging/images/:id/annotations')
     .post(annotationController.createAnnotation) //creates an annotation
+
+router.route('/medicalImaging/images/:imageLabel')
+    .get(imageController.findOneImage)
 
 module.exports = router;

@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const imageSchema = new Schema({
-    image: {
-        type: Object,
+    imageUrl: {
+        type: String,
         require: true
     },
-    annotations: Array
+    imageLabel: { type: String, require: true },
+    annotations: Array,
+    updated: { type: Date, default: Date.now }
 });
 
 const Image = mongoose.model("Images", imageSchema);

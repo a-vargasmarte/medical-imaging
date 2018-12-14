@@ -7,11 +7,13 @@ module.exports = {
             .create(req.body)
             .then(dbAnnotation => {
                 res.json(dbAnnotation);
-                console.log(dbAnnotation);
-                return dbImage.findByIdAndUpdate({ _id: dbAnnotation.imageId }, { $push: { annotations: dbAnnotation } }, { upsert: true, new: true })
+                // console.log(dbAnnotation);
+                console.log(req.params.id)
+
+                return dbImage.findByIdAndUpdate({ _id: req.params.id }, { $push: { annotations: dbAnnotation } }, { upsert: true, new: true })
             })
             .then(dbImage => {
-                console.log(dbImage)
+                // console.log(dbImage)
             })
             .catch(err => console.log(err))
     }

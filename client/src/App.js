@@ -11,8 +11,8 @@ class App extends Component {
   state = {
     images: [],
     selectedOption: {
-      value: './assets/images/5/5/50000.jpg',
-      label: '50000.jpg'
+      value: './assets/images/5/5/50000',
+      label: '50000'
     },
     selectedImage: '',
     savedImages: [],
@@ -34,8 +34,15 @@ class App extends Component {
 
   handleSelectChange = (selectedOption) => {
     console.log(selectedOption)
-    console.log(this.state.selectedOption)
-    this.setState({ selectedOption });
+    // console.log(this.state.selectedOption)
+    this.setState({
+      selectedOption: selectedOption,
+      annotations: []
+    });
+
+    axios.get(`/api/medicalImaging/images/${selectedOption.label}`)
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
     console.log(this.state.selectedOption)
   }
 
@@ -65,9 +72,9 @@ class App extends Component {
     })
 
     let imageObject = {
-      image: {
-        url: this.state.currentImage
-      }
+      imageUrl: this.state.selectedOption.value,
+      imageLabel: this.state.selectedOption.label,
+
     }
 
     let annotationObject = {
@@ -75,17 +82,20 @@ class App extends Component {
       imageId: ''
     }
 
+    console.log(imageObject)
 
     axios.post(`/api/medicalImaging/images`, imageObject)
       .then(res => {
-        console.log(res.data);
+        console.log(res);
         annotationObject.imageId = res.data._id
         console.log(annotationObject)
-        axios.post(`/api/medicalImaging/images/annotations/${res.data._id}`, annotationObject)
+
+        axios.post(`/api/medicalImaging/images/${annotationObject.imageId}/annotations`, annotationObject)
           .then(res => console.log(res))
           .catch(err => console.log(err))
       })
       .catch(err => console.log(err))
+
   }
 
 
@@ -101,12 +111,13 @@ class App extends Component {
           options={this.state.images}
           isSearchable={true}
           isClearable={true}
-          placeholder='Select an image..' />
+        // placeholder='Select an image..' 
+        />
 
         <div className="row">
           <div className="col-md-4">
             <Annotation
-              src={require(`${this.state.selectedOption.value}`)}
+              src={require(`${this.state.selectedOption.value}.jpg`)}
               alt="generic description"
               annotations={this.state.annotations}
               type={this.state.type}

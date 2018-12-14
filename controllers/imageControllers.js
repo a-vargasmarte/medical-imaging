@@ -17,6 +17,7 @@ module.exports = {
                     label: ''
                 }
 
+                file = file.replace('.jpg', "")
                 image.value = `./assets/images/5/5/` + file;
                 image.label = file
                 return image;
@@ -34,6 +35,17 @@ module.exports = {
         db
             .create(req.body)
             .then(dbImage => res.json(dbImage))
+            .catch(err => console.log(err))
+    },
+    findOneImage: (req, res) => {
+        db.
+            find({
+                "imageLabel": req.params.imageLabel
+            })
+            .sort({ "updated": -1 })
+            .then(dbImage => {
+                res.json(dbImage)
+            })
             .catch(err => console.log(err))
     }
 }
